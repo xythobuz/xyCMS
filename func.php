@@ -1,5 +1,5 @@
 <?
-$newsPerPage = 5;
+$newsPerPage = 8;
 $pageItems = 4;
 
 $countPages = 0;
@@ -7,6 +7,11 @@ $minPage = 0;
 $maxPage = 0;
 $prevOn = 0;
 $nextOn = 0;
+
+function getNewsPerPage() {
+    global $newsPerPage;
+    return $newsPerPage;
+}
 
 function newsPages() {
     global $newsPerPage;

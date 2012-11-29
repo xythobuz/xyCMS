@@ -357,6 +357,27 @@ if ($_GET['p'] != "blog") {
                 }
             }
         }
+        $items = getNewsPerPage();
+        $sql = 'SELECT datum, ueberschrift, inhalt FROM cms_news
+            ORDER BY datum DESC';
+        $result = mysql_query($sql);
+        if (!$result) {
+            echo "<h1>DB-Error!</h1>";
+        } else {
+            $skip = $page * $items;
+            while ($skip-- > 0) {
+                $row = mysql_fetch_array($result);
+            }
+            while (($items-- > 0) && (($row = mysql_fetch_array($result)) != NULL)) {
+                echo "<h1>".stripslashes($row['ueberschrift']);
+                echo " <small>".stripslashes($row['datum'])."</small></h1>";
+                echo "<p>".stripslashes($row['inhalt'])."</p>";
+                if ($items > 1)
+                    echo "<hr>";
+            }
+        }
+
+
         getPageData($page);
         echo '<div class="pagination"><ul>';
         echo "\n";
