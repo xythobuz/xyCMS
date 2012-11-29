@@ -54,7 +54,7 @@ if (isset($_GET['lang'])) {
     $xyCMS_selectlangsub = $xyCMS_selectlang2sub;
     $xyCMS_lang_age = $xyCMS_lang1_age;
     $xyCMS_langsql = "inhalt";
-    $xyCMS_switchedlang = "index.php?p=".$_GET['p']."&lang";
+    $xyCMS_switchedlang = "index.php?p=".$_GET['p']."&amp;lang";
     $xyCMS_lang1full = $xyCMS_lang1full2;
     $xyCMS_lang2full = $xyCMS_lang2full2;
     $xyCMS_link = "index.php?p=";
@@ -221,7 +221,7 @@ for ($i = 0; $i < maxNavItems(); $i++) {
                         </a>
                         <? } ?>
                         <? if (isset($xyCMS_flattrusername)) { ?>
-                        <br><a href="https://flattr.com/submit/auto?user_id=<? echo $xyCMS_flattrusername; ?>&url=<? echo $xyCMS_root; ?>">
+                        <br><a href="https://flattr.com/submit/auto?user_id=<? echo $xyCMS_flattrusername; ?>&amp;url=<? echo htmlentities($xyCMS_root); ?>">
                             <img src="https://api.flattr.com/button/flattr-badge-large.png" alt="Flattr Button">
                         </a>
                         <? } ?>
@@ -234,7 +234,7 @@ if ($result) {
                     <ul class="nav nav-tabs nav-stacked">
 <?
     while (($row = mysql_fetch_array($result)) != NULL) {
-        echo '<li><a href="'.$row['url'].'"';
+        echo '<li><a href="'.htmlspecialchars($row['url']).'"';
         if ($row['nofollow']) {
             echo ' rel="nofollow"';
         }
@@ -275,7 +275,7 @@ if ($_GET['p'] != "blog") {
         echo stripslashes($row[$xyCMS_langsql]);
         if (isset($xyCMS_flattrusername)) {
 ?>
-            <br><a href="https://flattr.com/submit/auto?user_id=<? echo $xyCMS_flattrusername; ?>&url=<? echo $xyCMS_link.$_GET['p']; ?>">
+            <br><a href="https://flattr.com/submit/auto?user_id=<? echo $xyCMS_flattrusername; ?>&amp;url=<? echo htmlentities($xyCMS_link.$_GET['p']); ?>">
                 <img src="https://api.flattr.com/button/flattr-badge-large.png" alt="Flattr Button">
             </a>
 <?      }
@@ -291,6 +291,12 @@ if ($_GET['p'] != "blog") {
             echo "<h1>".stripslashes($row['ueberschrift']);
             echo " <small>".stripslashes($row['datum'])."</small></h1>";
             echo "<p>".stripslashes($row['inhalt'])."</p>";
+            if (isset($xyCMS_flattrusername)) {
+?>
+            <br><a href="https://flattr.com/submit/auto?user_id=<? echo $xyCMS_flattrusername; ?>&amp;url=<? echo htmlentities($xyCMS_news."&amp;blog=".$_GET['blog']); ?>">
+                <img src="https://api.flattr.com/button/flattr-badge-large.png" alt="Flattr Button">
+            </a>
+<?      }
         }
         echo "<hr>";
         $sql = 'SELECT inhalt, autor, datum FROM cms_comments
@@ -358,7 +364,7 @@ if ($_GET['p'] != "blog") {
             }
         }
         $items = getNewsPerPage();
-        $sql = 'SELECT datum, ueberschrift, inhalt FROM cms_news
+        $sql = 'SELECT id, datum, ueberschrift, inhalt FROM cms_news
             ORDER BY datum DESC';
         $result = mysql_query($sql);
         if (!$result) {
@@ -369,8 +375,9 @@ if ($_GET['p'] != "blog") {
                 $row = mysql_fetch_array($result);
             }
             while (($items-- > 0) && (($row = mysql_fetch_array($result)) != NULL)) {
-                echo "<h1>".stripslashes($row['ueberschrift']);
-                echo " <small>".stripslashes($row['datum'])."</small></h1>";
+                echo "<h1><a href=\"".$xyCMS_news."&amp;blog=".$row['id']."\">";
+                echo stripslashes($row['ueberschrift']);
+                echo "</a> <small>".stripslashes($row['datum'])."</small></h1>";
                 echo "<p>".stripslashes($row['inhalt'])."</p>";
                 if ($items > 1)
                     echo "<hr>";

@@ -1,7 +1,7 @@
 <?
+include('config.php');
 if (basename($_SERVER['PHP_SELF']) == "stats.php") {
     // Script is called on its own, establish connection and print html head
-    include('config.php');
     $db = mysql_connect($sql_host, $sql_username, $sql_password);
     mysql_select_db($sql_database);
     if (mysql_errno()) {
@@ -40,12 +40,12 @@ if ($_GET['lang'] == "en") {
 <link rel="author" href="<? echo $xyCMS_authormail; ?>" />
 <link rel="shortcut icon" href="<? echo $xyCMS_root; ?>/favicon.ico" />
 <meta name="author" content="<? echo $xyCMS_author; ?>">
-<title>xythobuzCMS Statistics</title>
+<title>xyCMS Statistics</title>
 <meta name="robots" content="nofollow">
 </head>
 <body>
 <div class="admin">
-<h1>xythobuzCMS Statistics</h1>
+<h1>xyCMS Statistics</h1>
 <p>The left diagram shows the Pageviews, the central diagram shows the Visitors,
 the right diagram shows the Bots this month.</p>
 <p>Below, you see the referers of the visitors.
@@ -254,8 +254,8 @@ if (!isset($_GET['clean'])) {
         while ($row = mysql_fetch_array($result)) {
             $ref = $row['referer'];
 
-            // for second if condition:
-            $regex = str_ireplace('www.', '', parse_url($xythobuzCMS_root, PHP_URL_HOST));
+            // for second if condition: internal link
+            $regex = str_ireplace('www.', '', parse_url($xyCMS_root, PHP_URL_HOST));
             $regex = "~".$regex."~"; // Delimiter
 
             if (preg_match('~google\.~', $ref)) {
@@ -268,7 +268,7 @@ if (!isset($_GET['clean'])) {
                 }
             } else if (preg_match($regex, $ref)) { // --> internal link
                 $ref = str_ireplace("www.", "", $ref);
-                if ($ref == str_ireplace("www.", "", $xythobuzCMS_root)."/") {
+                if ($ref == str_ireplace("www.", "", $xyCMS_root)."/") {
                     $ref = $ref."index.php";
                 }
                 if (!isset($internalLinks[$ref])) {
@@ -333,7 +333,7 @@ if (!isset($_GET['clean'])) {
                         echo "<a href=\"".$link."\">";
                         $link = str_ireplace("www.", "", $link);
                         $link = str_ireplace("http://", "", $link);
-                        $link = str_ireplace(parse_url($xythobuzCMS_root, PHP_URL_HOST), "", $link);
+                        $link = str_ireplace(parse_url($xyCMS_root, PHP_URL_HOST), "", $link);
                         $link = substr($link, 1);
                         if (!preg_match("~mobile/~", $link)) {
                             if (preg_match("~index.php~", $link)) {
@@ -443,7 +443,7 @@ if (!isset($_GET['clean'])) {
             echo "<br><a href=\"admin.php\">OK!</a>";
         }
     } else if ($_GET['clean'] == "Clear Internal") {
-        $sql = 'DELETE FROM cms_referer	WHERE referer REGEXP "'.str_ireplace('www.', '', parse_url($xythobuzCMS_root, PHP_URL_HOST)).'"';
+        $sql = 'DELETE FROM cms_referer	WHERE referer REGEXP "'.str_ireplace('www.', '', parse_url($xyCMS_root, PHP_URL_HOST)).'"';
         $result = mysql_query($sql);
         if (!$result) {
             echo "Could not delete Internal links (".mysql_error($result).")!";
@@ -453,7 +453,7 @@ if (!isset($_GET['clean'])) {
         }
     } else if ($_GET['clean'] == "Clear External") {
         $sql = 'DELETE FROM cms_referer
-            WHERE (NOT referer REGEXP "'.str_ireplace('www.', '', parse_url($xythobuzCMS_root, PHP_URL_HOST)).'")
+            WHERE (NOT referer REGEXP "'.str_ireplace('www.', '', parse_url($xyCMS_root, PHP_URL_HOST)).'")
             AND (NOT referer REGEXP "google\.")';
         $result = mysql_query($sql);
         if (!$result) {
