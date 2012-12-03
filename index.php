@@ -167,7 +167,7 @@ if (isset($_POST['inputText']) && isset($_POST['inputName'])) {
             <h1><? echo $xyCMS_title; ?> <small><? echo $xyCMS_subtitle; ?></small></h1>
             </div>
             <div class="row-fluid">
-                <div class="span4">
+                <div class="span3">
                     <div class="well" style="padding: 8px 0;">
                     <ul class="nav nav-list">
                         <li<? if ($_GET['p'] == "blog") echo ' class="active"'; ?>>
@@ -246,7 +246,7 @@ if ($result) {
 }
 ?>
                 </div>
-                <div class="span8">
+                <div class="span9">
 <?
 if ($_GET['p'] != "blog") {
     // Page
