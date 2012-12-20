@@ -181,7 +181,8 @@ fclose($handle);
 print "Saved $path...<br>\n";
 ?>
 <hr>
-<a href="stats.php">Stats</a><br>
+<? include ("stats.php"); ?>
+<hr>
 <a href="logout.php">Logout</a><br>
 <a href="index.php">Home</a><br>
 <a href="admin.php">Admin</a><br>

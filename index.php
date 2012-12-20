@@ -86,7 +86,7 @@ if ($language == 1) {
             if (isset($_GET['blog']) && is_numeric($_GET['blog'])) {
                 $sql = 'SELECT * FROM cms_news WHERE id = '.mysql_real_escape_string($_GET['blog']);
                 $row = mysql_fetch_array(mysql_query($sql));
-                echo '<title>'.stripslashes($row['ueberschrift']).'</title>';
+                echo '<title>'.stripslashes($row['ueberschrift'])." - ".$xyCMS_title.' Blog</title>';
             } else {
                 echo '<title>'.$xyCMS_title.' Blog</title>';
             }
@@ -95,7 +95,7 @@ if ($language == 1) {
             $row = mysql_fetch_array(mysql_query($sql));
             if ($row) {
                 echo '<meta name="description" content="'.stripslashes($row['beschreibung']).'">';
-                echo '<title>'.stripslashes($row['beschreibung']).'</title>';
+                echo '<title>'.stripslashes($row['beschreibung'])." - ".$xyCMS_title.'</title>';
             } else {
                 echo '<meta name="description" content="'.$xyCMS_title.' '.$xyCMS_subtitle.'">';
                 echo '<title>'.$xyCMS_title.' '.$xyCMS_subtitle.'</title>';
@@ -425,9 +425,6 @@ if ($_GET['p'] != "blog") {
 
                         <li><a class="brand" href="http://www.xythobuz.org">xyCMS</a></li>
 
-                        <form class="navbar-search">
-                            <input type="text" class="search-query" placeholder="<? echo $xyCMS_searchText; ?>">
-                        </form>
 <?
         $sql = 'SELECT inhalt FROM cms_codenav ORDER BY id ASC';
         $result = mysql_query($sql);
