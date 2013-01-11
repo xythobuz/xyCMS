@@ -6,6 +6,6 @@ It uses the same Database layout as its predecessor [xythobuzCMS](https://github
 
 ## Quick Setup
 
-Copy all the files to your webserver. Delete the example config.php. Now run setup.php and delete it after completion.
+Copy all the files to your webserver. Run Setup.php to create the SQL Tables. Delete the config file created by setup.php, replace it with your modified example config.
 
 This should have prepared everything. The admin interface is reachable via admin.php.

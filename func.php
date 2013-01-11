@@ -108,16 +108,6 @@ function printBreadcrumbs($id, $before1, $between1, $after1, $before2, $after2, 
     }
 }
 
-function checkComment($comment) {
-    $filter = file("spam.txt", FILE_IGNORE_NEW_LINES);
-    foreach ($filter as $key=>$val) {
-        if (stripos($comment, $val) !== false) {
-            return $val;
-        }
-    }
-    return -1;
-}
-
 function greenAlert($text) {
 ?>
 <div class="alert alert-success">

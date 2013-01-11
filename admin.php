@@ -39,7 +39,6 @@ if ($_GET['lang'] == "en") {
 <a href="admin/addnews.php">Add News</a><br>
 <a href="admin/editnews.php">Edit News</a><br>
 <a href="admin/deletenews.php">Delete News</a><br>
-<a href="admin/deletecomment.php">Manage Comments</a><br>
 <h2>Links</h2>
 <a href="admin/addlink.php">Add Link</a><br>
 <a href="admin/editlink.php">Edit Links</a><br>

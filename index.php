@@ -129,40 +129,7 @@ if (isset($xyCMS_onload)) {
                     <? echo $xyCMS_selectlangsub; ?>
                 </a>
             </div>
-            <? }
-if (isset($_POST['inputText']) && isset($_POST['inputName'])) {
-    $res = checkComment($_POST['inputText']);
-    if ($res != -1) {
-        redAlert("Bad Word: ".$res);
-    } else if (checkCaptcha()) {
-        redAlert("Captcha wrong!");
-    } else {
-        $sql = 'INSERT INTO
-            cms_comments(datum, autor, inhalt, parent, frei)
-        VALUES
-            (FROM_UNIXTIME('.time().'),
-            "'.mysql_real_escape_string($_POST['inputName']).'",
-            "'.mysql_real_escape_string($_POST['inputText']).'",
-            '.mysql_real_escape_string($_GET['blog']).',
-            '.$xyCMS_com.')';
-        $result = mysql_query($sql);
-        if (!$result) {
-            die("Database Error!");
-        }
-        if ($xyCMS_com == "FALSE") {
-            $subject = "New Comment!";
-            $body = $_POST['inputName']." posted the following comment on ".$xyCMS_title.":\n\n".$_POST['inputText']."\n";
-            if (!mail($xyCMS_authormail, $subject, $body)) {
-                redAlert("Could not notify moderator!");
-            } else {
-                greenAlert("Comment added. Validation by a moderator is pending!");
-            }
-        } else {
-            greenAlert("Comment added!");
-        }
-    }
-}
-?>
+            <? } ?>
             <div class="page-header">
             <h1><? echo $xyCMS_title; ?> <small><? echo $xyCMS_subtitle; ?></small></h1>
             </div>
@@ -296,64 +263,23 @@ if ($_GET['p'] != "blog") {
             <br><a href="https://flattr.com/submit/auto?user_id=<? echo $xyCMS_flattrusername; ?>&amp;url=<? echo htmlentities($xyCMS_news."&amp;blog=".$_GET['blog']); ?>">
                 <img src="https://api.flattr.com/button/flattr-badge-large.png" alt="Flattr Button">
             </a>
-<?      }
-        }
-        echo "<hr>";
-        $sql = 'SELECT inhalt, autor, datum FROM cms_comments
-            WHERE parent = '.mysql_real_escape_string($_GET['blog']).'
-            AND frei = 1';
-        $res = mysql_query($sql);
-        if (!$res) {
-            die("DB-Error!");
-        }
-        if (($row = mysql_fetch_array($res)) == NULL) {
-            echo "<h2>No comments!</h2>";
-        } else {
-            echo "<br><h2>Comments:</h2>";
-            do {
-                echo "<h3>".stripslashes($row['autor'])." <small>".stripslashes($row['datum'])."</small></h2>";
-                echo "<p>".htmlspecialchars(stripslashes($row['inhalt']))."</p>";
-            } while (($row = mysql_fetch_array($res)) != NULL);
-        }
+<?          }
+            if (isset($xyCMS_disqus)) {
 ?>
-                    <hr><h3>Add comment</h3>
-                    <form class="form-horizontal" method="post">
-                        <div class="control-group">
-                            <label class="control-label">
-                                Name
-                            </label>
-                            <div class="controls">
-                                <input type="text" name="inputName" placeholder="Name">
-                            </div>
-                        </div>
-                        <div class="control-group">
-                            <label class="control-label">
-                                Comment
-                            </label>
-                            <div class="controls">
-                                <textarea rows="5" name="inputText" placeholder="Comment"></textarea>
-                            </div>
-                        </div>
-                        <? if (isset($xyCMS_captcha_pub)) { ?>
-                        <div class="control-group">
-                            <label class="control-label">
-                                reCAPTCHA
-                            </label>
-                            <div class="controls">
+                    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = '<? echo $xyCMS_disqus; ?>';
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
 <?
-        require_once("recaptchalib.php");
-        echo recaptcha_get_html($xyCMS_captcha_pub);
-?>
-                            </div>
-                        </div>
-                        <? } ?>
-                        <div class="control-group">
-                            <div class="controls">
-                                <button type="submit" class="btn">Send comment</button>
-                            </div>
-                        </div>
-                    </form>
-<?
+            }
+        }
     } else {
         $page = 0;
         if (isset($_GET['page'])) {

@@ -109,41 +109,6 @@ function onReady() {
 		// List articles
 		listNews();
 	} else {
-		if (isset($_POST['comment'])) {
-			// Add comment
-			$ok = 1;
-			if (isset($xyCMS_captcha_priv)) {
-				require_once('../recaptchalib.php');
-				$resp = recaptcha_check_answer($xyCMS_captcha_priv, $_SERVER['REMOTE_ADDR'], $_POST['recaptcha_challenge_field'], $_POST['recaptcha_response_field']);
-				if (!$resp->is_valid) {
-					echo "<p>Captcha wrong!</p>";
-					$ok = 0;
-				}
-			}
-			if ($ok == 1) {
-				$sql = 'INSERT INTO
-					cms_comments(datum, autor, inhalt, parent, frei)
-				VALUES
-					(FROM_UNIXTIME('.time().'),
-					"'.mysql_real_escape_string($_POST['autor']).'",
-					"'.mysql_real_escape_string($_POST['comment']).'",
-					'.mysql_real_escape_string($_GET['news']).',
-					'.$xyCMS_com.')';
-				$result = mysql_query($sql);
-				if (!$result) {
-					echo "<p>Could not add comment!</p>";
-				} else {
-					echo "<p>Comment added!</p>";
-					if ($xyCMS_com == "FALSE") {
-						$subject = "New Comment!";
-						$body = $_POST['autor']." posted the following comment on ".$xyCMS_title.":\n\n".$_POST['comment']."\n";
-						if (!mail($xyCMS_authormail, $subject, $body)) {
-							echo "Mail Error!";
-						}
-					}
-				}
-			}
-		}
 		// Show article
 		$sql = 'SELECT inhalt, ueberschrift, datum
 		FROM cms_news
@@ -162,55 +127,20 @@ function onReady() {
 		echo $content;
 ?>		</li>
 	</ul>
-<?		$sql = 'SELECT inhalt, datum, autor
-		FROM cms_comments
-		WHERE parent = '.mysql_real_escape_string($_GET['news']).' && frei = TRUE
-		ORDER BY datum ASC';
-		$result = mysql_query($sql);
-		if ($result) {
-			$row = mysql_fetch_array($result);
-			if ($row == false) {
-?>	<ul class="pageitem">
-		<li class="textbox">
-No Comments!
-		</li>
-	</ul>
-<?			} else {
-				do {
-?>	<span class="graytitle"><? echo $row['autor']." (".$row['datum'].")"; ?></span>
-	<ul class="pageitem">
-		<li class="textbox">
-<?					echo stripslashes($row['inhalt']); ?>
-		</li>
-	</ul>
-<?				} while($row = mysql_fetch_array($result));
-			}
-		} else {
-			echo "Query Error!";
-			exit;
-		}
-?>	<form method="post"><fieldset>
-		<span class="graytitle">New Comment</span>
-		<ul class="pageitem">
-			<li class="bigfield">
-				<input placeholder="Nickname" type="text" name="autor" />
-			</li>
-			<li class="textbox">
-				<span class="header">Comment</span>
-				<textarea name="comment" rows="3"></textarea>
-			</li>
-<?		if (isset($xyCMS_captcha_pub)) {
-			require_once('../recaptchalib.php'); ?>
-			<li class="textbox">
-				<? echo recaptcha_get_html($xyCMS_captcha_pub); ?>
-			</li>
-<?		} ?>
-			<li class="button">
-				<input type="submit" name="Submit comment" value="Submit comment" />
-			</li>
-		</ul>
-	</fieldset></form>
-<?	}
+<?      if (isset($xyCMS_disqus)) { ?>
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        var disqus_shortname = '<? echo $xyCMS_disqus; ?>';
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+<?	    }
+    }
 } else { // Navigation: ?>
 	<span class="graytitle">Navigation</span>
 	<ul class="pageitem">
