@@ -35,10 +35,19 @@ if (WIDTH <= 300) {
 // Used colors
 $img = @imagecreate(WIDTH, HEIGHT)
     or die ("Can't create GD Stream!");
-$white = imagecolorallocate($img, 255, 255, 255); // Set white background
-$black = imagecolorallocate($img, 0, 0, 0);
+$white = 0;
+$black = 0;
+if (isset($_GET['transparent'])) {
+    $white = imagecolorallocate($img, 0, 0, 0);
+    imagecolortransparent($img, $white); // Transparent BG
+    $black = imagecolorallocate($img, 255, 255, 255); // White Text
+} else {
+    $white = imagecolorallocate($img, 255, 255, 255); // Set white background
+    $black = imagecolorallocate($img, 0, 0, 0);
+}
 $grey = imagecolorallocate($img, 176, 176, 69);
 $blue = imagecolorallocate($img, 42, 42, 242);
+$weekendColor = imagecolorallocate($img, 242, 42, 42);
 
 $clause = ""; // Prevent log-filling warnings
 if (isset($_GET['d'])) { // d is the number of days to show, ending today
@@ -98,18 +107,24 @@ $oldPoint = 0;
 
 while ($row = mysql_fetch_array($result)) {
     $date = str_replace(date('Y-m-'), "", $row['day']); // Strip month and year
+    $color = $blue;
+    if (date('N', strtotime($row['day'])) >= 6) {
+        $color = $weekendColor;
+    }
     if ($oldPoint == 0) {
-        $oldPoint = drawPoint($date, $row['visitors'], $max, $day, $img, $blue, $black, NULL, $printDays, $start);
+        $oldPoint = drawPoint($date, $row['visitors'], $max, $day, $img, $color, $black, NULL, $printDays, $start, $blue);
     } else {
-        $oldPoint = drawPoint($date, $row['visitors'], $max, $day, $img, $blue, $black, $oldPoint, $printDays, $start);
+        $oldPoint = drawPoint($date, $row['visitors'], $max, $day, $img, $color, $black, $oldPoint, $printDays, $start, $blue);
     }
 }
 
 // Draw the usual stuff
-imagefilledrectangle($img, 0, 0, WIDTH-1, 1, $black); // Line top
-imagefilledrectangle($img, 0, 0, 1, HEIGHT-1, $black); // Line left
-imagefilledrectangle($img, WIDTH-1, 0, WIDTH-2, HEIGHT-1, $black); // Line right
-imagefilledrectangle($img, WIDTH-1, HEIGHT-1, 0, HEIGHT-2, $black); // Line bottom
+if (isset($_GET['transparent'])) {
+    imagefilledrectangle($img, 0, 0, WIDTH-1, 1, $black); // Line top
+    imagefilledrectangle($img, 0, 0, 1, HEIGHT-1, $black); // Line left
+    imagefilledrectangle($img, WIDTH-1, 0, WIDTH-2, HEIGHT-1, $black); // Line right
+    imagefilledrectangle($img, WIDTH-1, HEIGHT-1, 0, HEIGHT-2, $black); // Line bottom
+}
 if ($renderVisitors) {
     imagestring($img, 4, 3, 3, "Visitors ".date('m.Y')." ".$xyCMS_title, $black);
 } else if ($renderBots) {
@@ -185,7 +200,7 @@ exit;
 // x = days, from 1 to $maxDay
 // y = views, from 0 to $maxViews
 // printDays: 0 if you want days to be printed
-function drawPoint($x, $y, $maxViews, $maxDay, $img, $color1, $color2, $oldPoint = NULL, $printDays = 0, $minDay = 1) {
+function drawPoint($x, $y, $maxViews, $maxDay, $img, $color1, $color2, $oldPoint = NULL, $printDays = 0, $minDay = 1, $color3) {
     // Beauty fix for first day of month
     if ($maxDay <= 1) {
         $maxDay = 2;
@@ -204,7 +219,7 @@ function drawPoint($x, $y, $maxViews, $maxDay, $img, $color1, $color2, $oldPoint
 
     // Draw line to last point
     if (isset($oldPoint) && (!is_null($oldPoint) && ($x != 1))) {
-        imageline($img, $oldPoint[0], $oldPoint[1], $a, $b, $color1);
+        imageline($img, $oldPoint[0], $oldPoint[1], $a, $b, $color3);
     }
 
     // Prepare return array
