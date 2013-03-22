@@ -248,16 +248,14 @@ if (!isset($_GET['clean'])) {
         $g = 0; // Index for googleTerm
         $googleTerm = array(); // Store google search terms
         $googleLink = array(); // Store full google link
-        $internalLinks = array();
         $o = 0; // Index for otherLinks
         $otherLinks = array(); // Store other links (index: o)
+
+        $regex = str_ireplace('www.', '', parse_url($xyCMS_root, PHP_URL_HOST));
+        $regex = "~".$regex."~"; // Delimiter
+
         while ($row = mysql_fetch_array($result)) {
             $ref = $row['referer'];
-
-            // for second if condition: internal link
-            $regex = str_ireplace('www.', '', parse_url($xyCMS_root, PHP_URL_HOST));
-            $regex = "~".$regex."~"; // Delimiter
-
             if (preg_match('~google\.~', $ref)) {
                 // Google visitor
                 $googleLink[$g] = $ref;
@@ -266,17 +264,7 @@ if (!isset($_GET['clean'])) {
                     $googleTerm[$g] = $googleTerm[$g][1]; // Thats the search term
                     $g++;
                 }
-            } else if (preg_match($regex, $ref)) { // --> internal link
-                $ref = str_ireplace("www.", "", $ref);
-                if ($ref == str_ireplace("www.", "", $xyCMS_root)."/") {
-                    $ref = $ref."index.php";
-                }
-                if (!isset($internalLinks[$ref])) {
-                    $internalLinks[$ref] = 1;
-                } else {
-                    $internalLinks[$ref]++;
-                }
-            } else {
+            } else if (!preg_match($regex, $ref)) {
                 // Other link. Save it
                 $otherLinks[$o++] = $ref;
             }
@@ -286,7 +274,7 @@ if (!isset($_GET['clean'])) {
             echo "There are no recorded referers. Maybe the list was cleared not long ago?";
         } else {
             // Show stats
-            echo "<div style=\"float: left; width: 33%;\">";
+            echo "<div style=\"float: left; width: 49%;\">";
             if (count($googleTerm) > 0) {
                 echo "<table style=\"width: 100%;\" border=\"1\"><tr><th>Google search terms</th></tr>";
                 foreach ($googleTerm as $key => $term) {
@@ -305,7 +293,7 @@ if (!isset($_GET['clean'])) {
             echo "</div>\n";
 
             // External links
-            echo "<div style=\"float: left; width: 33%;\">";
+            echo "<div style=\"float: right; width: 49%;\">";
             if (count($otherLinks) > 0) {
                 echo "<table style=\"width: 100%;\" border=\"1\"><tr><th>External link</th></tr>";
                 foreach ($otherLinks as $link) {
@@ -321,101 +309,12 @@ if (!isset($_GET['clean'])) {
             }
             echo "</div>\n";
 
-            // Internal Links
-            echo "<div style=\"float: left; width: 33%;\">";
-            if ((isset($internalLinks)) && (count($internalLinks) > 0)) {
-                echo "<table style=\"width: 100%;\" border=\"1\"><tr><th>Internal Link</th><th>Count</th></tr>";
-                asort($internalLinks);
-                $internalLinks = array_reverse($internalLinks, true);
-                foreach ($internalLinks as $link => $count) {
-                    if (!(filter_var($link, FILTER_VALIDATE_URL) === FALSE)) {
-                        echo "<tr><td>";
-                        echo "<a href=\"".$link."\">";
-                        $link = str_ireplace("www.", "", $link);
-                        $link = str_ireplace("http://", "", $link);
-                        $link = str_ireplace(parse_url($xyCMS_root, PHP_URL_HOST), "", $link);
-                        $link = substr($link, 1);
-                        if (!preg_match("~mobile/~", $link)) {
-                            if (preg_match("~index.php~", $link)) {
-                                // Page
-                                $tmp = array();
-                                preg_match("/p=(.*)&/UiS", $link.'&', $tmp);
-                                if (isset($tmp[1])) {
-                                    echo $tmp[1];
-                                } else {
-                                    echo "Home";
-                                }
-                            } else if (preg_match("~news.php~", $link)) {
-                                // News
-                                $tmp = array();
-                                preg_match("/beitrag=(.*)&/UiS", $link.'&', $tmp);
-                                if (isset($tmp[1])) {
-                                    echo "News: ";
-                                    echo $tmp[1];
-                                } else {
-                                    if (preg_match("/p=(.*)&/UiS", $link.'&', $tmp)) {
-                                        if (isset($tmp[1])) {
-                                            echo "News: ".$tmp[1];
-                                        } else {
-                                            echo "News...?";
-                                        }
-                                    } else {
-                                        echo "News";
-                                    }
-                                }
-                            } else if (preg_match("~search.php~", $link)) {
-                                $tmp = array();
-                                preg_match("/term=(.*)&/UiS", $link.'&', $tmp);
-                                if (isset($tmp[1])) {
-                                    echo "Search: ";
-                                    echo $tmp[1];
-                                } else {
-                                    echo "Search";
-                                }
-                            } else {
-                                // Something else...
-                                echo $link;
-                            }
-                        } else {
-                            // Mobile version
-                            echo "iOS";
-                            $link = str_ireplace("mobile/index.php", "", $link);
-                            if (strlen($link) > 0) {
-                                $link = str_ireplace("?", "", $link);
-                                $link = str_ireplace("=", ":", $link);
-                                $link = str_ireplace("p:", "", $link);
-                                $link = str_ireplace("news:", "News: ", $link);
-                                echo ": ".$link;
-                            }
-                        }
-                        echo "</a></td><td>";
-                        echo $count;
-                        echo "</td></tr>";
-                    }
-                }
-                echo "</table>";
-            } else {
-                echo "<p>No internal links detected.</p>";
-            }
-            echo "</div>\n";
-
             // Clear Buttons
             echo '<div style="clear: left;">';
             if (basename($_SERVER['PHP_SELF']) == "admin.php") {
                 echo '<form action="admin.php" method="get">';
-                echo '<input type="submit" name="clean" value="Clear Google"';
-                if (!(count($googleTerm) > 0)) {
-                    echo " disabled";
-                }
-                echo '><input type="submit" name="clean" value="Clear External"';
-                if (!(count($otherLinks) > 0)) {
-                    echo " disabled";
-                }
-                echo '><input type="submit" name="clean" value="Clear Internal"';
-                if (!(count($internalLinks) > 0)) {
-                    echo " disabled";
-                }
-                echo '><br><input type="submit" name="clean" value="Clear All" /></form>';
+                echo '<input type="submit" name="clean" value="Clear All" />';
+                echo '</form>';
             }
             echo "</div>\n";
         }
@@ -431,35 +330,6 @@ if (!isset($_GET['clean'])) {
             echo "Could not delete referers (".mysql_error($result).")!";
         } else {
             echo "Cleared referers!";
-            echo "<br><a href=\"admin.php\">OK!</a>";
-        }
-    } else if ($_GET['clean'] == "Clear Google") {
-        $sql = 'DELETE FROM cms_referer WHERE referer REGEXP "google\."';
-        $result = mysql_query($sql);
-        if (!$result) {
-            echo "Could not delete Google search terms (".mysql_error($result).")!";
-        } else {
-            echo "Cleared Google search terms!";
-            echo "<br><a href=\"admin.php\">OK!</a>";
-        }
-    } else if ($_GET['clean'] == "Clear Internal") {
-        $sql = 'DELETE FROM cms_referer	WHERE referer REGEXP "'.str_ireplace('www.', '', parse_url($xyCMS_root, PHP_URL_HOST)).'"';
-        $result = mysql_query($sql);
-        if (!$result) {
-            echo "Could not delete Internal links (".mysql_error($result).")!";
-        } else {
-            echo "Cleared Internal links!";
-            echo "<br><a href=\"admin.php\">OK!</a>";
-        }
-    } else if ($_GET['clean'] == "Clear External") {
-        $sql = 'DELETE FROM cms_referer
-            WHERE (NOT referer REGEXP "'.str_ireplace('www.', '', parse_url($xyCMS_root, PHP_URL_HOST)).'")
-            AND (NOT referer REGEXP "google\.")';
-        $result = mysql_query($sql);
-        if (!$result) {
-            echo "Could not delete External links (".mysql_error($result).")!";
-        } else {
-            echo "Cleared External links!";
             echo "<br><a href=\"admin.php\">OK!</a>";
         }
     } else {
