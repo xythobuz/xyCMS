@@ -274,7 +274,7 @@ if (!isset($_GET['clean'])) {
             echo "There are no recorded referers. Maybe the list was cleared not long ago?";
         } else {
             // Show stats
-            echo "<div style=\"float: left; width: 49%;\">";
+            echo "<table border=\"0\" style=\"width: 100%;\"><tr><td>";
             if (count($googleTerm) > 0) {
                 echo "<table style=\"width: 100%;\" border=\"1\"><tr><th>Google search terms</th></tr>";
                 foreach ($googleTerm as $key => $term) {
@@ -290,10 +290,10 @@ if (!isset($_GET['clean'])) {
             } else {
                 echo "<p>No google search terms detected.</p>";
             }
-            echo "</div>\n";
+            echo "</td>\n";
 
             // External links
-            echo "<div style=\"float: right; width: 49%;\">";
+            echo "<td>";
             if (count($otherLinks) > 0) {
                 echo "<table style=\"width: 100%;\" border=\"1\"><tr><th>External link</th></tr>";
                 foreach ($otherLinks as $link) {
@@ -307,16 +307,15 @@ if (!isset($_GET['clean'])) {
             } else {
                 echo "<p>No external links to this website detected.</p>";
             }
-            echo "</div>\n";
+            echo "</td></tr>\n";
 
             // Clear Buttons
-            echo '<div style="clear: left;">';
             if (basename($_SERVER['PHP_SELF']) == "admin.php") {
-                echo '<form action="admin.php" method="get">';
+                echo '<tr><td><form action="admin.php" method="get">';
                 echo '<input type="submit" name="clean" value="Clear All" />';
-                echo '</form>';
+                echo '</form></td></tr>';
             }
-            echo "</div>\n";
+            echo "</table>\n";
         }
     } else {
         echo "Could not get referers (".mysql_error($result).")!";
